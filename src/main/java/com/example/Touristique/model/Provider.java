@@ -12,5 +12,5 @@
     public class Provider extends User {
 
         @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
-        private List<Service> servicesOffert;
+        private List<TouristicService> servicesOffert;
     }

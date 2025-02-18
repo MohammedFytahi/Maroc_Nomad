@@ -24,7 +24,7 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "service_id")
-    private Service service;
+    private TouristicService service;
 
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
     private Payment payment;

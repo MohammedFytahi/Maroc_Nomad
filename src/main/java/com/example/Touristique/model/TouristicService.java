@@ -9,7 +9,8 @@ import java.util.List;
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
-public class Service {
+@Table(name = "service")
+public class TouristicService {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

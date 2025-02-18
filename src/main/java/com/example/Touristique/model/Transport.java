@@ -9,9 +9,9 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-public class Transport extends Service {
+public class Transport extends TouristicService {
 
     private String type;
     private Date date;
-    private int duration;
+    private Integer  duration;
 }

@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
-    private List<Service> servicesOfferts; // Lien avec les services fournis par un provider
+    private List<TouristicService> servicesOfferts; // Lien avec les services fournis par un provider
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

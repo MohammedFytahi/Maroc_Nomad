@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Activite extends Service {
+public class Activite extends TouristicService {
 
     @ElementCollection
     private List<String> menu;

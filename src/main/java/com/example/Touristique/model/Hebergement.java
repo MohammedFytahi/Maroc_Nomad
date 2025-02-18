@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Hebergement extends Service {
+public class Hebergement extends TouristicService {
 
     private String type;
 
