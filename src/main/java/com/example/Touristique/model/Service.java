@@ -3,14 +3,13 @@ package com.example.Touristique.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
-
 @Entity
 @Getter
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Service {
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+public class Service {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +21,8 @@ public abstract class Service {
     private boolean disponibilite;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id")
-    private Provider provider;
+    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    private User provider;
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<Reservation> reservations;

@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users") // Assurez-vous que la table en base est bien `users`
 @Getter
 @Setter
 public class User implements UserDetails {
@@ -35,11 +35,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Reservation> reservations;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
+    private List<Service> servicesOfferts; // Lien avec les services fournis par un provider
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -48,7 +45,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // Utilisez l'email comme nom d'utilisateur
+        return email;
     }
 
     @Override

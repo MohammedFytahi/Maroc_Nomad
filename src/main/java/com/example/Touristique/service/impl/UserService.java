@@ -7,6 +7,7 @@ import com.example.Touristique.enums.Role;
 import com.example.Touristique.mapper.UserMapper;
 import com.example.Touristique.model.User;
 import com.example.Touristique.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,7 +25,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -33,6 +33,7 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public UserDTO registerUser(UserDTO userDTO) {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("Email already in use !");
