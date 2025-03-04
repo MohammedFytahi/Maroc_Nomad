@@ -40,10 +40,10 @@ public class UserService {
         }
 
         User user = userMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Encode le mot de passe
-        user.setRole(Role.valueOf(userDTO.getRole())); // Convertit le rôle en enum
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(Role.valueOf(userDTO.getRole()));
 
-        User savedUser = userRepository.save(user); // Sauvegarde l'utilisateur en base de données
+        User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }
 
@@ -60,8 +60,12 @@ public class UserService {
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            String token = jwtService.generateToken((UserDetails) user);
-            return new LoginResponse(token);
+            String token = jwtService.generateToken((UserDetails) authentication.getPrincipal());
+            String role = user.getRole().name();
+
+            LoginResponse response = new LoginResponse(token, role);
+            System.out.println("Login response: " + response); // Debug log
+            return response;
         } else {
             throw new UsernameNotFoundException("Invalid credentials");
         }

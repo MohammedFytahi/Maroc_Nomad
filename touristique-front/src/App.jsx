@@ -1,0 +1,35 @@
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AddService from "./pages/AddService";
+import setupAxiosInterceptors from './utils/axiosSetup';
+
+const App = () => {
+    useEffect(() => {
+        // Set up axios interceptors
+        setupAxiosInterceptors();
+
+        // Log initial auth state
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        console.log('Current auth state:', {
+            isAuthenticated: !!token,
+            role: role
+        });
+    }, []);
+
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/provider/add-service" element={<AddService />} />
+            </Routes>
+        </Router>
+    );
+};
+
+export default App;

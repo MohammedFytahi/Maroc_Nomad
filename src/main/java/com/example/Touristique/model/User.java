@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
-@Table(name = "users") // Assurez-vous que la table en base est bien `users`
+@Table(name = "users")
 @Getter
 @Setter
 public class User implements UserDetails {
@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
-    private List<TouristicService> servicesOfferts; // Lien avec les services fournis par un provider
+    private List<TouristicService> servicesOfferts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
