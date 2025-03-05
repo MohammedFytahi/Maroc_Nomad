@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,8 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
+                       AuthenticationManager authenticationManager, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
@@ -36,13 +36,11 @@ public class UserService {
     @Transactional
     public UserDTO registerUser(UserDTO userDTO) {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Email already in use !");
+            throw new RuntimeException("Email already in use!");
         }
-
         User user = userMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole(Role.valueOf(userDTO.getRole()));
-
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }
@@ -50,24 +48,21 @@ public class UserService {
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return userMapper.toDTO(user);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId()); // Assurez-vous que l'ID est mappé
+        userDTO.setEmail(user.getEmail());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setRole(user.getRole().name());
+        return userDTO;
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
-        if (authentication.isAuthenticated()) {
-            User user = userRepository.findByEmail(loginRequest.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            String token = jwtService.generateToken((UserDetails) authentication.getPrincipal());
-            String role = user.getRole().name();
-
-            LoginResponse response = new LoginResponse(token, role);
-            System.out.println("Login response: " + response); // Debug log
-            return response;
-        } else {
-            throw new UsernameNotFoundException("Invalid credentials");
-        }
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String token = jwtService.generateToken(user); // Inclut maintenant le rôle
+        String role = user.getRole().name();
+        return new LoginResponse(token, role);
     }
 }

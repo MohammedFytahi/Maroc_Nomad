@@ -20,12 +20,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
+        System.out.println("User role from DB: " + user.getRole().name()); // Debug
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .authorities("ROLE_" + user.getRole().name())
+                .authorities("ROLE_" + user.getRole().name()) // Ajoute le préfixe ROLE_
                 .build();
-
     }
 }

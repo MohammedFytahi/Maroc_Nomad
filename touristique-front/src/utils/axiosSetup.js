@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const setupAxiosInterceptors = () => {
-    // Log all requests
     axios.interceptors.request.use(
         config => {
             console.log('API Request:', {
@@ -9,13 +8,10 @@ const setupAxiosInterceptors = () => {
                 method: config.method,
                 data: config.data
             });
-
-            // Add auth token if available
             const token = localStorage.getItem('token');
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
-
             return config;
         },
         error => {
@@ -24,7 +20,6 @@ const setupAxiosInterceptors = () => {
         }
     );
 
-    // Log all responses
     axios.interceptors.response.use(
         response => {
             console.log('API Response:', {

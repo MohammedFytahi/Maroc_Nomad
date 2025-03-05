@@ -34,10 +34,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                        .requestMatchers("/services/transport", "/services/restauration","/api/provider/**").hasRole("PROVIDER")
+                        .requestMatchers("/api/services/transport", "/api/services/restauration", "/api/provider/**").hasRole("PROVIDER")
                         .requestMatchers("/api/reservations/reserver/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
+                .anonymous(anonymous -> anonymous.disable())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

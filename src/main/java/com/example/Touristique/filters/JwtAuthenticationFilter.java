@@ -1,7 +1,7 @@
 package com.example.Touristique.filters;
 
 import com.example.Touristique.service.impl.JwtService;
- import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        System.out.println("Auth Header: " + authHeader);
+        System.out.println("Auth Header: " + authHeader); // Debug
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("Aucun token ou format invalide");
@@ -39,25 +39,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        System.out.println("JWT: " + jwt);
+        System.out.println("JWT: " + jwt); // Debug
         final String userEmail = jwtService.extractUsername(jwt);
-        System.out.println("Email extrait: " + userEmail);
+        System.out.println("Email extrait: " + userEmail); // Debug
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            System.out.println("UserDetails chargé: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities());
+            System.out.println("UserDetails chargé: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities()); // Debug
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                System.out.println("Token valide");
+                System.out.println("Token valide"); // Debug
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
-                System.out.println("Token invalide");
+                System.out.println("Token invalide"); // Debug
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }

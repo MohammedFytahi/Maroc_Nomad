@@ -5,11 +5,11 @@ import com.example.Touristique.dto.LoginResponse;
 import com.example.Touristique.dto.UserDTO;
 import com.example.Touristique.service.impl.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
     private final UserService userService;
 
@@ -25,7 +25,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse response = userService.login(loginRequest);
-        System.out.println("API Response: " + response); // Debug log
+        System.out.println("API Response: " + response);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            UserDTO userDTO = userService.getUserByEmail(email);
+            return ResponseEntity.ok(userDTO);
+        }
+        return ResponseEntity.status(401).body(null);
     }
 }
