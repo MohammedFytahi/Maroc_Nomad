@@ -27,4 +27,6 @@ public class TouristicService {
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
+    @Column(name = "image_url")
+    private String imageUrl;
 }

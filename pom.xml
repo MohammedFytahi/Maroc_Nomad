@@ -38,6 +38,11 @@
 			<artifactId>itextpdf</artifactId>
 			<version>5.5.13.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>24.0.0</version> <!-- Vérifiez la dernière version sur Maven Central -->
+		</dependency>
 
 		<!-- Spring Boot Starter Validation (for validation support) -->
 		<dependency>

@@ -9,5 +9,7 @@ import org.mapstruct.factory.Mappers;
 public interface RestaurationMapper {
     RestaurationMapper INSTANCE = Mappers.getMapper(RestaurationMapper.class);
 
-    Restauration toEntity(RestaurationDTO dto); // Pas de mapping pour provider
+    Restauration toEntity(RestaurationDTO dto);
+    RestaurationDTO toDto(Restauration entity);
+
 }

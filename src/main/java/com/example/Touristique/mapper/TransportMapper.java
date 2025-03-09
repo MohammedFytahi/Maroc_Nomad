@@ -10,4 +10,5 @@ public interface TransportMapper {
     TransportMapper INSTANCE = Mappers.getMapper(TransportMapper.class);
 
     Transport toEntity(TransportDTO dto); // Pas de mapping pour provider
+    TransportDTO toDto(Transport entity);
 }

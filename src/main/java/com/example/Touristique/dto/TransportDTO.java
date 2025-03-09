@@ -10,4 +10,5 @@ public class TransportDTO extends ServiceDTO {
     private String type;
     private Date date;
     private int duration;
+    private String imageUrl;
 }
