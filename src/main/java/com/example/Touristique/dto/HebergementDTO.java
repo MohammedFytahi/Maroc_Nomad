@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class HebergementDTO {
+    private Long id;
     private String nom;
     private String description;
     private Double prix;

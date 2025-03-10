@@ -7,6 +7,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class TransportDTO extends ServiceDTO {
+    private Long id;
     private String type;
     private Date date;
     private int duration;

@@ -7,7 +7,7 @@ import java.util.List;
 @Getter
 @Setter
 public class RestaurationDTO {
-
+    private Long id;
     private String nom;
     private String description;
     private double prix;

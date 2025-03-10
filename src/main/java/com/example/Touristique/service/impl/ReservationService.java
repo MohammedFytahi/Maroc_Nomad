@@ -8,8 +8,10 @@ import com.example.Touristique.repository.ServiceRepository;
 import com.example.Touristique.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +27,7 @@ public class ReservationService {
         this.serviceRepository = serviceRepository;
     }
 
+    @Transactional
     public Reservation reserverService(Long serviceId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -38,7 +41,7 @@ public class ReservationService {
         reservation.setUser(userOpt.get());
         reservation.setService(serviceOpt.get());
         reservation.setDateReservation(new Date());
-        reservation.setStatut("EN_ATTENTE");
+        reservation.setStatut("EN_ATTENTE_PAIEMENT");
 
         return reservationRepository.save(reservation);
     }
@@ -55,7 +58,27 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    @Transactional
     public void annulerReservation(Long reservationId) {
+        // Vérifier si le paiement est déjà effectué avant d'annuler
+        Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
+        if (reservationOpt.isPresent() &&
+                ("CONFIRMEE".equals(reservationOpt.get().getStatut()) ||
+                        "COMPLETE".equals(reservationOpt.get().getStatut()))) {
+            // Logique pour traiter le remboursement si nécessaire
+        }
+
         reservationRepository.deleteById(reservationId);
+    }
+
+    public List<Reservation> getUserReservations() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Utilisateur introuvable");
+        }
+
+        return reservationRepository.findByUserOrderByDateReservationDesc(userOpt.get());
     }
 }

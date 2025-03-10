@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ServiceDTO {
+    private Long id;
     private String nom;
     private String description;
     private double prix;

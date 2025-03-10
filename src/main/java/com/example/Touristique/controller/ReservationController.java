@@ -17,6 +17,9 @@ public class ReservationController {
 
     @PostMapping("/reserver/{serviceId}")
     public ResponseEntity<Reservation> reserverService(@PathVariable Long serviceId) {
+        if (serviceId == null || serviceId < 1) {
+            throw new IllegalArgumentException("ID du service invalide");
+        }
         Reservation reservation = reservationService.reserverService(serviceId);
         return ResponseEntity.ok(reservation);
     }

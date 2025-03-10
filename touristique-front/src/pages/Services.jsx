@@ -18,33 +18,34 @@ const Services = () => {
 
     useEffect(() => {
         const fetchServices = async () => {
-            setIsLoading(true)
-            setErrorMessage("")
-            const token = localStorage.getItem("token")
+            setIsLoading(true);
+            setErrorMessage("");
+            const token = localStorage.getItem("token");
 
             if (!token) {
-                setErrorMessage("Veuillez vous connecter pour voir les services")
-                navigate("/login")
-                return
+                setErrorMessage("Veuillez vous connecter pour voir les services");
+                navigate("/login");
+                return;
             }
 
             try {
                 const response = await axios.get("/api/services/all", {
                     headers: { Authorization: `Bearer ${token}` },
-                })
-                setServices(response.data)
-                setFilteredServices(response.data)
+                });
+                console.log("Réponse de l'API :", response.data); // Ajoutez ce log
+                setServices(response.data);
+                setFilteredServices(response.data);
             } catch (error) {
-                console.error("Erreur lors de la récupération des services :", error.response?.status, error.response?.data)
-                setErrorMessage(error.response?.data?.message || "Erreur lors de la récupération des services")
+                console.error("Erreur lors de la récupération des services :", error.response?.status, error.response?.data);
+                setErrorMessage(error.response?.data?.message || "Erreur lors de la récupération des services");
             } finally {
-                setIsLoading(false)
+                setIsLoading(false);
             }
-        }
+        };
 
-        fetchServices()
-    }, [navigate])
-
+        fetchServices();
+    }, [navigate]);
+    // Fonction pour filtrer les services
     useEffect(() => {
         let result = services
 
@@ -68,6 +69,45 @@ const Services = () => {
         setFilteredServices(result)
     }, [services, searchQuery, activeFilter])
 
+    const handleReservation = async (serviceId) => {
+        // Debug what's being passed
+        console.log("Service ID for reservation:", serviceId);
+
+        if (!serviceId) {
+            setErrorMessage("ID du service manquant");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            setErrorMessage("Veuillez vous connecter pour réserver un service");
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `/api/reservations/reserver/${serviceId}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.status === 200) {
+                alert("Réservation réussie !");
+                navigate("/reservations");
+            }
+        } catch (error) {
+            console.error("Erreur lors de la réservation:", error);
+            console.error("Status:", error.response?.status);
+            console.error("Data:", error.response?.data);
+            setErrorMessage(error.response?.data?.message || "Erreur lors de la réservation");
+        }
+    };
+
+    // Fonction pour déterminer le type de service
     const getServiceTypeLabel = (service) => {
         if (service.type && service.date) return "Transport"
         if (service.menu) return "Restauration"
@@ -75,6 +115,7 @@ const Services = () => {
         return "Autre"
     }
 
+    // Fonction pour déterminer la couleur du type de service
     const getServiceTypeColor = (service) => {
         const type = getServiceTypeLabel(service)
         switch (type) {
@@ -85,6 +126,7 @@ const Services = () => {
         }
     }
 
+    // Fonction pour afficher les détails du service
     const renderServiceDetails = (service) => {
         if (service.type && service.date) {
             return (
@@ -340,7 +382,29 @@ const Services = () => {
                                             {renderServiceDetails(service)}
                                             <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
                                                 <div className="text-xs text-gray-500">ID Fournisseur: {service.providerId}</div>
-                                                <button className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                <button
+                                                    onClick={() => {
+                                                        // Log the entire service object to inspect its properties
+                                                        console.log("Full service object:", service);
+
+                                                        // Check what ID property might be available
+                                                        const serviceId = service.id;
+                                                        console.log("Service ID from id property:", serviceId);
+
+                                                        // If provider is an object, also log the provider ID
+                                                        if (service.provider) {
+                                                            console.log("Provider ID:", service.provider.id);
+                                                        }
+
+                                                        // Proceed with reservation if we have an ID
+                                                        if (serviceId) {
+                                                            handleReservation(serviceId);
+                                                        } else {
+                                                            setErrorMessage("ID du service manquant");
+                                                        }
+                                                    }}
+                                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                >
                                                     Réserver
                                                 </button>
                                             </div>
