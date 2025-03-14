@@ -29,6 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         final String authHeader = request.getHeader("Authorization");
         System.out.println("Auth Header: " + authHeader); // Debug
 
@@ -39,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        System.out.println("JWT: " + jwt); // Debug
+        System.out.println("JWT: " + jwt);
         final String userEmail = jwtService.extractUsername(jwt);
         System.out.println("Email extrait: " + userEmail); // Debug
 
@@ -48,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("UserDetails chargé: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities()); // Debug
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                System.out.println("Token valide"); // Debug
+                System.out.println("Token valide");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

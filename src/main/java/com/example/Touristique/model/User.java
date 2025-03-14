@@ -1,6 +1,7 @@
 package com.example.Touristique.model;
 
 import com.example.Touristique.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,9 +39,13 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
     private List<TouristicService> servicesOfferts;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Reservation> reservations;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name())); // "ROLE_PROVIDER"
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override

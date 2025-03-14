@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AddService from "./pages/AddService";
 import Services from "./pages/Services" ;
+import Payment from './pages/Payment';
+import UserReservations from './pages/UserReservations';
 import setupAxiosInterceptors from './utils/axiosSetup';
 
 const App = () => {
@@ -29,6 +31,8 @@ const App = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/provider/add-service" element={<AddService />} />
                 <Route path="/services" element={<Services />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/reservations" element={<UserReservations />} />
             </Routes>
         </Router>
     );

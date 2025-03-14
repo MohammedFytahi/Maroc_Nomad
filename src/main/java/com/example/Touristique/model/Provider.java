@@ -9,6 +9,7 @@
     @Entity
     @Getter
     @Setter
+
     public class Provider extends User {
 
         @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)

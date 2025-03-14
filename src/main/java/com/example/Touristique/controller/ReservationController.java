@@ -5,6 +5,8 @@ import com.example.Touristique.service.impl.ReservationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
@@ -34,5 +36,17 @@ public class ReservationController {
     public ResponseEntity<Void> annulerReservation(@PathVariable Long id) {
         reservationService.annulerReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<Reservation>> getUserReservations() {
+        try {
+            List<Reservation> reservations = reservationService.getUserReservations();
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+             System.err.println("Erreur lors de la récupération des réservations: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

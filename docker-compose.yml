@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=tourist_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=2001
+      - JWT_SECRET=mysecretkey
+      - FILE_UPLOAD_DIR=/uploads/services
+    depends_on:
+      - db
+    volumes:
+      - uploads:/uploads/services
+    networks:
+      - touristique-network
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=tourist_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2001
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - touristique-network
+
+volumes:
+  db-data:
+  uploads:
+
+networks:
+  touristique-network:
+    driver: bridge

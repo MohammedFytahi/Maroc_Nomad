@@ -23,6 +23,7 @@ public class TouristicService {
 
     @ManyToOne
     @JoinColumn(name = "provider_id", referencedColumnName = "id")
+
     private User provider;
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)

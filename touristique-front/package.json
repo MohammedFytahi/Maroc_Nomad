@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.2",
+    "@stripe/react-stripe-js": "^3.4.0",
+    "@stripe/stripe-js": "^6.0.0",
     "axios": "^1.8.1",
     "lucide-react": "^0.477.0",
     "react": "^19.0.0",

@@ -69,15 +69,7 @@ const Services = () => {
         setFilteredServices(result)
     }, [services, searchQuery, activeFilter])
 
-    const handleReservation = async (serviceId) => {
-        // Debug what's being passed
-        console.log("Service ID for reservation:", serviceId);
-
-        if (!serviceId) {
-            setErrorMessage("ID du service manquant");
-            return;
-        }
-
+    const handleReservation = async (serviceId, amount) => {
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -87,7 +79,8 @@ const Services = () => {
         }
 
         try {
-            const response = await axios.post(
+            // Étape 1 : Créer la réservation
+            const reservationResponse = await axios.post(
                 `/api/reservations/reserver/${serviceId}`,
                 {},
                 {
@@ -95,18 +88,18 @@ const Services = () => {
                 }
             );
 
-            if (response.status === 200) {
-                alert("Réservation réussie !");
-                navigate("/reservations");
+            if (reservationResponse.status === 200) {
+                const reservationId = reservationResponse.data.id; // Récupérer l'ID de la réservation
+                alert("Réservation créée avec succès !");
+
+                // Étape 2 : Rediriger vers la page de paiement avec l'ID de la réservation et le montant
+                navigate('/payment', { state: { reservationId, amount } });
             }
         } catch (error) {
             console.error("Erreur lors de la réservation:", error);
-            console.error("Status:", error.response?.status);
-            console.error("Data:", error.response?.data);
             setErrorMessage(error.response?.data?.message || "Erreur lors de la réservation");
         }
     };
-
     // Fonction pour déterminer le type de service
     const getServiceTypeLabel = (service) => {
         if (service.type && service.date) return "Transport"
@@ -383,26 +376,7 @@ const Services = () => {
                                             <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
                                                 <div className="text-xs text-gray-500">ID Fournisseur: {service.providerId}</div>
                                                 <button
-                                                    onClick={() => {
-                                                        // Log the entire service object to inspect its properties
-                                                        console.log("Full service object:", service);
-
-                                                        // Check what ID property might be available
-                                                        const serviceId = service.id;
-                                                        console.log("Service ID from id property:", serviceId);
-
-                                                        // If provider is an object, also log the provider ID
-                                                        if (service.provider) {
-                                                            console.log("Provider ID:", service.provider.id);
-                                                        }
-
-                                                        // Proceed with reservation if we have an ID
-                                                        if (serviceId) {
-                                                            handleReservation(serviceId);
-                                                        } else {
-                                                            setErrorMessage("ID du service manquant");
-                                                        }
-                                                    }}
+                                                    onClick={() => handleReservation(service.id, service.prix)}
                                                     className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                                 >
                                                     Réserver

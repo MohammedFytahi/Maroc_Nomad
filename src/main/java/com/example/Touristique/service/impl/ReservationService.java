@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -60,25 +61,21 @@ public class ReservationService {
 
     @Transactional
     public void annulerReservation(Long reservationId) {
-        // Vérifier si le paiement est déjà effectué avant d'annuler
         Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
         if (reservationOpt.isPresent() &&
                 ("CONFIRMEE".equals(reservationOpt.get().getStatut()) ||
                         "COMPLETE".equals(reservationOpt.get().getStatut()))) {
-            // Logique pour traiter le remboursement si nécessaire
-        }
+         }
 
         reservationRepository.deleteById(reservationId);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> getUserReservations() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Utilisateur introuvable");
-        }
-
-        return reservationRepository.findByUserOrderByDateReservationDesc(userOpt.get());
+        return reservationRepository.findByUser(user);
     }
 }
