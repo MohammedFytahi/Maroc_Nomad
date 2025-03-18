@@ -18,7 +18,7 @@ public class TouristicService {
 
     private String nom;
     private String description;
-    private double prix;
+    private Double prix;
     private boolean disponibilite;
 
     @ManyToOne
@@ -30,4 +30,8 @@ public class TouristicService {
     private List<Reservation> reservations;
     @Column(name = "image_url")
     private String imageUrl;
+
+    public boolean getDisponibilite() {
+        return disponibilite;
+    }
 }

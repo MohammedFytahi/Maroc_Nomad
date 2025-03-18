@@ -6,6 +6,7 @@ import com.example.Touristique.model.User;
 import com.example.Touristique.repository.ReservationRepository;
 import com.example.Touristique.repository.ServiceRepository;
 import com.example.Touristique.repository.UserRepository;
+import com.example.Touristique.service.interf.ReservationServiceInterface;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class ReservationService {
+public class ReservationService implements ReservationServiceInterface {
 
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;

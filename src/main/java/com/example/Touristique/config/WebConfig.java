@@ -9,8 +9,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Map "/uploads/**" to the physical location where files are stored
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
+        String uploadDir = "file:/C:/Users/YCode/Desktop/Touristique/uploads/services/";
+        System.out.println("Mapping /uploads/services/** to " + uploadDir);
+        registry.addResourceHandler("/uploads/services/**")
+                .addResourceLocations(uploadDir)
+                .setCachePeriod(0);
     }
 }

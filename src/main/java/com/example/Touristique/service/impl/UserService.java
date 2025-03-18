@@ -7,6 +7,7 @@ import com.example.Touristique.enums.Role;
 import com.example.Touristique.mapper.UserMapper;
 import com.example.Touristique.model.User;
 import com.example.Touristique.repository.UserRepository;
+import com.example.Touristique.service.interf.UserServiceInterface;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
+public class UserService implements UserServiceInterface {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

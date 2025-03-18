@@ -5,6 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +20,8 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -30,38 +34,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getMethod().equals("OPTIONS")) {
+        String requestURI = request.getRequestURI();
+
+        // Ignorer les chemins statiques et les requêtes OPTIONS
+        if (shouldSkipAuthentication(request)) {
+            logger.debug("Ignorer l'authentification pour: {}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }
+
+        logger.debug("Traitement de la requête JWT: {}", requestURI);
+
+        // Vérification du token JWT
         final String authHeader = request.getHeader("Authorization");
-        System.out.println("Auth Header: " + authHeader); // Debug
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Aucun token ou format invalide");
+            logger.debug("Pas de token JWT trouvé pour: {}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }
 
         final String jwt = authHeader.substring(7);
-        System.out.println("JWT: " + jwt);
         final String userEmail = jwtService.extractUsername(jwt);
-        System.out.println("Email extrait: " + userEmail); // Debug
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            System.out.println("UserDetails chargé: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities()); // Debug
+            logger.debug("Utilisateur trouvé: {}, Rôles: {}", userDetails.getUsername(), userDetails.getAuthorities());
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                System.out.println("Token valide");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.debug("Authentification réussie pour l'utilisateur: {}", userDetails.getUsername());
             } else {
-                System.out.println("Token invalide"); // Debug
+                logger.debug("Token JWT invalide");
             }
         }
+
         filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkipAuthentication(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Ignorer les requêtes OPTIONS (pour CORS pre-flight)
+        if ("OPTIONS".equals(method)) {
+            return true;
+        }
+
+        // Ignorer les ressources statiques
+        return path.startsWith("/uploads/");
     }
 }

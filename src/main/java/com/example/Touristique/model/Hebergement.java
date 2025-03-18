@@ -20,4 +20,5 @@ public class Hebergement extends TouristicService {
 
     private Double note;
     private Date dateCalculated;
+
 }

@@ -5,6 +5,7 @@ import com.example.Touristique.model.Reservation;
 import com.example.Touristique.model.TouristicService;
 import com.example.Touristique.repository.PaymentRepository;
 import com.example.Touristique.repository.ReservationRepository;
+import com.example.Touristique.service.interf.PaymentServiceInterface;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -17,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class PaymentService {
+public class PaymentService implements PaymentServiceInterface {
 
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
@@ -30,6 +31,7 @@ public class PaymentService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Override
     @Transactional
     public Map<String, Object> createPaymentIntent(Long reservationId) {
         Stripe.apiKey = stripeSecretKey;
@@ -76,6 +78,7 @@ public class PaymentService {
         }
     }
 
+    @Override
     @Transactional
     public void confirmerPaiement(String paymentIntentId) {
         try {

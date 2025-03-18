@@ -17,4 +17,8 @@ public class ActiviteDTO {
     private List<String> menu;
     private List<String> optionRegime;
     private String imageUrl;
+
+    public Boolean getDisponibilite() {
+        return disponibilite;
+    }
 }

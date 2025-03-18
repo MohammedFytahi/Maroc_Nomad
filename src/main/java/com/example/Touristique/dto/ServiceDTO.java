@@ -9,8 +9,8 @@ public class ServiceDTO {
     private Long id;
     private String nom;
     private String description;
-    private double prix;
-    private boolean disponibilite;
+    private Double prix;
+    private Boolean disponibilite;
     private Long providerId;
     private String imageUrl;
 }
