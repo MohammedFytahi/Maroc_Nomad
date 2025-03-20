@@ -1,0 +1,164 @@
+name: CI/CD Pipeline for Touristique
+
+# Déclenche le workflow sur les push et pull requests vers la branche main
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# Définit les permissions pour le workflow
+permissions:
+  contents: read
+
+jobs:
+  # Job pour le backend (Spring Boot)
+  backend-build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Cloner le dépôt
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Étape 2 : Configurer Java (votre projet utilise Java 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Étape 3 : Mettre en cache les dépendances Maven
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Étape 4 : Compiler et exécuter les tests avec Maven
+      - name: Build and test backend with Maven
+        run: mvn clean install -B
+
+      # Étape 5 : Publier les résultats des tests
+      - name: Publish Backend Test Report
+        if: always()
+        uses: scacap/action-surefire-report@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job pour le frontend (React)
+  frontend-build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Cloner le dépôt
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Étape 2 : Configurer Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ajustez selon votre version de Node.js
+          cache: 'npm'
+          cache-dependency-path: touristique-front/package-lock.json
+
+      # Étape 3 : Naviguer dans le dossier frontend
+      - name: Navigate to frontend directory
+        run: cd touristique-front
+
+      # Étape 4 : Installer les dépendances
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: touristique-front
+
+      # Étape 5 : Construire le projet React
+      - name: Build the frontend
+        run: npm run build
+        working-directory: touristique-front
+
+      # Étape 6 : (Optionnel) Exécuter les tests
+      - name: Run frontend tests
+        run: npm test
+        working-directory: touristique-front
+        # Commentez cette étape si vous n'avez pas encore de tests
+
+      # Étape 7 : Téléverser l'artefact (le dossier build/)
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: touristique-front/build
+
+  # Job pour déployer le backend (Docker Hub)
+  backend-deploy:
+    needs: backend-build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build JAR
+        run: mvn package -DskipTests -B
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image for backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/touristique-backend:${{ github.sha }}
+
+  # Job pour déployer le frontend (Netlify)
+  frontend-deploy:
+    needs: frontend-build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: touristique-front/build
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: 'touristique-front/build'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy frontend from GitHub Actions: ${{ github.event.head_commit.message }}"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

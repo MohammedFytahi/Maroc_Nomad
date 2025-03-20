@@ -52,8 +52,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Autoriser les requêtes OPTIONS pour CORS
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Autoriser l'accès public aux endpoints d'authentification
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         // Autoriser l'accès public aux images
@@ -67,8 +66,9 @@ public class SecurityConfig {
                                 "/api/services/restauration/**",
                                 "/api/services/activite/**",
                                 "/api/services/hebergement/**"
-                                ).hasRole("PROVIDER")
+                        ).hasRole("PROVIDER")
                         .requestMatchers("/api/reservations/**", "/api/payments/**").hasRole("USER")
+                        .requestMatchers("/api/reviews/**").hasRole("USER") // Ajout de la règle pour /api/reviews
                         .requestMatchers("/api/services/all").authenticated()
                         .anyRequest().authenticated()
                 )

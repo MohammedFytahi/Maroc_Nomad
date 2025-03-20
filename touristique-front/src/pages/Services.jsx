@@ -1,9 +1,11 @@
 "use client"
-
+import React from "react";
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useNavigate, Link } from "react-router-dom"
 import { motion } from "framer-motion"
+// Modifier l'import en haut du fichier pour utiliser .jsx au lieu de .tsx
+import ReviewModal from "../components/ReviewModal.jsx"
 
 const Services = () => {
     const [services, setServices] = useState([])
@@ -23,6 +25,15 @@ const Services = () => {
     const [editFormData, setEditFormData] = useState({})
     const [selectedImage, setSelectedImage] = useState(null)
     const [imagePreview, setImagePreview] = useState("")
+    // Ajouter ces états au début du composant, avec les autres états
+    // Remplacer les états liés à la review par un seul état pour le service à évaluer
+    const [serviceToReview, setServiceToReview] = useState(null)
+
+    // Supprimer ces états qui sont maintenant gérés dans le composant ReviewModal
+    // const [reviewFormData, setReviewFormData] = useState({
+    //   note: 5,
+    //   commentaire: ""
+    // })
     const navigate = useNavigate()
 
     // Fonction pour gérer les erreurs d'image
@@ -354,6 +365,7 @@ const Services = () => {
         console.log("Service:", service)
         console.log("Service provider ID:", service.providerId)
 
+        // Si nous n'avons pas d'information sur l'utilisateur actuel, retourner false
         if (!currentUser) {
             console.log("No current user, returning false")
             return false
@@ -619,7 +631,7 @@ const Services = () => {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth={2}
-                                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-.181h4.914a1 1 0 00.951-.69l1.519-4.674z"
                                     />
                                 </svg>
                             </div>
@@ -635,7 +647,7 @@ const Services = () => {
                                                 viewBox="0 0 20 20"
                                                 fill="currentColor"
                                             >
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-.181h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                             </svg>
                                         ))}
                                     </div>
@@ -648,6 +660,17 @@ const Services = () => {
         }
         return null
     }
+
+    // Ajouter cette fonction pour gérer l'ouverture du modal de review
+    // Modifier la fonction openReviewModal pour qu'elle soit plus simple
+    const openReviewModal = (service) => {
+        setServiceToReview(service)
+    }
+
+    // Ajouter cette fonction pour gérer les changements dans le formulaire de review
+    // Supprimer ces fonctions qui sont maintenant gérées dans le composant ReviewModal
+    // const handleReviewFormChange = (e) => { ... }
+    // const handleReviewSubmit = async (e) => { ... }
 
     // Ouvrir le modal avec les détails du service
     const openServiceModal = (service) => {
@@ -1221,19 +1244,19 @@ const Services = () => {
 
                 {/* Liste des services */}
                 {!isLoading && filteredServices.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredServices.map((service, index) => (
                             <motion.div
                                 key={service.id || index}
-                                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
                                 variants={cardVariants}
                                 initial="hidden"
                                 animate="visible"
                                 custom={index}
-                                whileHover={{ y: -5 }}
+                                whileHover={{ y: -5, scale: 1.02 }}
                             >
                                 {/* Image du service */}
-                                <div className="h-48 w-full overflow-hidden relative">
+                                <div className="h-56 w-full overflow-hidden relative">
                                     <img
                                         src={
                                             service.imageUrl
@@ -1241,12 +1264,12 @@ const Services = () => {
                                                 : "/placeholder.svg?height=300&width=500"
                                         }
                                         alt={service.nom || "Service"}
-                                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
                                         onError={handleImageError}
                                     />
-                                    <div className="absolute top-0 right-0 m-2">
+                                    <div className="absolute top-0 right-0 m-3">
                     <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getServiceTypeColor(service)}`}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 ${getServiceTypeColor(service)}`}
                     >
                       {getServiceTypeLabel(service)}
                     </span>
@@ -1254,7 +1277,7 @@ const Services = () => {
 
                                     {/* Boutons d'édition et de suppression pour les propriétaires */}
                                     {isServiceOwner(service) && (
-                                        <div className="absolute top-2 left-2 flex space-x-2 z-10">
+                                        <div className="absolute top-3 left-3 flex space-x-2 z-10">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
@@ -1303,13 +1326,13 @@ const Services = () => {
                                 </div>
 
                                 {/* Contenu du service */}
-                                <div className="p-5">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-lg font-bold text-gray-900 hover:text-indigo-600 transition-colors">
+                                <div className="p-6 flex-grow flex flex-col">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-xl font-bold text-gray-900 hover:text-indigo-600 transition-colors line-clamp-1">
                                             {service.nom || "Service sans nom"}
                                         </h3>
                                         <span
-                                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                                                 service.disponibilite ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                             }`}
                                         >
@@ -1317,11 +1340,11 @@ const Services = () => {
                     </span>
                                     </div>
 
-                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                    <p className="text-sm text-gray-600 mb-5 line-clamp-3 flex-grow">
                                         {service.description || "Aucune description disponible"}
                                     </p>
 
-                                    <div className="flex justify-between items-center mb-4">
+                                    <div className="flex justify-between items-center mb-5 mt-auto">
                                         <div className="flex items-center">
                                             <svg
                                                 className="h-5 w-5 text-indigo-500 mr-1"
@@ -1339,39 +1362,31 @@ const Services = () => {
                         {service.duration ? `${service.duration} min` : "Durée non spécifiée"}
                       </span>
                                         </div>
-                                        <div className="text-xl font-bold text-indigo-600">{service.prix} MAD</div>
+                                        <div className="text-2xl font-bold text-indigo-600">{service.prix} MAD</div>
                                     </div>
 
-                                    <div className="flex space-x-2">
+                                    <div className="grid grid-cols-2 gap-3">
                                         <button
                                             onClick={() => openServiceModal(service)}
-                                            className="flex-1 bg-white border border-gray-300 rounded-lg py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                                            className="bg-white border-2 border-indigo-500 rounded-lg py-2.5 px-4 text-sm font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                                         >
                                             Détails
                                         </button>
                                         {isServiceOwner(service) ? (
-                                            <div className="flex-1 flex space-x-1">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleEditService(service)
-                                                    }}
-                                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2 px-2 text-sm font-medium transition-colors"
-                                                >
-                                                    Modifier
-                                                </button>
-                                                <button
-                                                    onClick={(e) => openDeleteModal(service, e)}
-                                                    className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg py-2 px-2 text-sm font-medium transition-colors"
-                                                >
-                                                    Supprimer
-                                                </button>
-                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleEditService(service)
+                                                }}
+                                                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2.5 px-4 text-sm font-medium transition-colors"
+                                            >
+                                                Modifier
+                                            </button>
                                         ) : (
                                             <button
                                                 onClick={() => handleReservation(service.id, service.prix)}
                                                 disabled={!service.disponibilite}
-                                                className={`flex-1 rounded-lg py-2 px-4 text-sm font-medium text-white transition-colors ${
+                                                className={`rounded-lg py-2.5 px-4 text-sm font-medium text-white transition-colors ${
                                                     service.disponibilite
                                                         ? "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                                         : "bg-gray-400 cursor-not-allowed"
@@ -1380,6 +1395,12 @@ const Services = () => {
                                                 Réserver
                                             </button>
                                         )}
+                                        <button
+                                            onClick={() => openReviewModal(service)}
+                                            className="col-span-2 bg-green-600 hover:bg-green-700 text-white rounded-lg py-2.5 px-4 text-sm font-medium transition-colors"
+                                        >
+                                            Ajouter une review
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -1464,21 +1485,33 @@ const Services = () => {
                                         </button>
                                     </>
                                 ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowModal(false)
-                                            handleReservation(selectedService.id, selectedService.prix)
-                                        }}
-                                        disabled={!selectedService.disponibilite}
-                                        className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm ${
-                                            selectedService.disponibilite
-                                                ? "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                                : "bg-gray-400 cursor-not-allowed"
-                                        }`}
-                                    >
-                                        Réserver
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowModal(false)
+                                                handleReservation(selectedService.id, selectedService.prix)
+                                            }}
+                                            disabled={!selectedService.disponibilite}
+                                            className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm ${
+                                                selectedService.disponibilite
+                                                    ? "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                    : "bg-gray-400 cursor-not-allowed"
+                                            }`}
+                                        >
+                                            Réserver
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowModal(false)
+                                                openReviewModal(selectedService)
+                                            }}
+                                            className="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-500 text-base font-medium text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                        >
+                                            Ajouter un avis
+                                        </button>
+                                    </>
                                 )}
                                 <button
                                     type="button"
@@ -1613,6 +1646,20 @@ const Services = () => {
                     </div>
                 </div>
             )}
+
+            <ReviewModal
+                isOpen={serviceToReview !== null}
+                onClose={() => setServiceToReview(null)}
+                service={serviceToReview}
+                onSuccess={(message) => {
+                    setSuccessMessage(message)
+                    setTimeout(() => setSuccessMessage(""), 3000)
+                }}
+                onError={(message) => {
+                    setErrorMessage(message)
+                    setTimeout(() => setErrorMessage(""), 3000)
+                }}
+            />
         </div>
     )
 }

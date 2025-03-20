@@ -1,5 +1,7 @@
 package com.example.Touristique.service.impl;
 
+import com.example.Touristique.dto.ReservationDTO;
+import com.example.Touristique.mapper.ReservationMapper;
 import com.example.Touristique.model.Reservation;
 import com.example.Touristique.model.TouristicService;
 import com.example.Touristique.model.User;
@@ -22,11 +24,14 @@ public class ReservationService implements ReservationServiceInterface {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final ServiceRepository serviceRepository;
+    private final ReservationMapper reservationMapper;
 
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, ServiceRepository serviceRepository) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
+                              ServiceRepository serviceRepository, ReservationMapper reservationMapper) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.serviceRepository = serviceRepository;
+        this.reservationMapper = reservationMapper;
     }
 
     @Transactional
@@ -66,17 +71,21 @@ public class ReservationService implements ReservationServiceInterface {
         if (reservationOpt.isPresent() &&
                 ("CONFIRMEE".equals(reservationOpt.get().getStatut()) ||
                         "COMPLETE".equals(reservationOpt.get().getStatut()))) {
-         }
+            // Logique d'annulation si nécessaire
+        }
 
         reservationRepository.deleteById(reservationId);
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> getUserReservations() {
+    public List<ReservationDTO> getUserReservations() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        return reservationRepository.findByUser(user);
+        List<Reservation> reservations = reservationRepository.findByUser(user);
+        return reservations.stream()
+                .map(reservationMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

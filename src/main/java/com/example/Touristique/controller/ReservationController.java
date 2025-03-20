@@ -1,5 +1,6 @@
 package com.example.Touristique.controller;
 
+import com.example.Touristique.dto.ReservationDTO;
 import com.example.Touristique.model.Reservation;
 import com.example.Touristique.service.impl.ReservationService;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +40,12 @@ public class ReservationController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Reservation>> getUserReservations() {
+    public ResponseEntity<List<ReservationDTO>> getUserReservations() {
         try {
-            List<Reservation> reservations = reservationService.getUserReservations();
+            List<ReservationDTO> reservations = reservationService.getUserReservations();
             return ResponseEntity.ok(reservations);
         } catch (Exception e) {
-             System.err.println("Erreur lors de la récupération des réservations: " + e.getMessage());
+            System.err.println("Erreur lors de la récupération des réservations: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

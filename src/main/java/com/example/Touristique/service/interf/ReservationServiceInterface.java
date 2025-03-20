@@ -1,6 +1,7 @@
 package com.example.Touristique.service.interf;
 
 
+import com.example.Touristique.dto.ReservationDTO;
 import com.example.Touristique.model.Reservation;
 import java.util.List;
 
@@ -31,5 +32,5 @@ public interface ReservationServiceInterface {
      * Récupère toutes les réservations de l'utilisateur connecté.
      * @return Liste des réservations de l'utilisateur
      */
-    List<Reservation> getUserReservations();
+    List<ReservationDTO> getUserReservations();
 }

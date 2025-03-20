@@ -9,8 +9,10 @@ import RegisterPage from "./pages/RegisterPage"
 import AddService from "./pages/AddService"
 import Services from "./pages/Services"
 import Payment from "./pages/Payment"
+import ProviderServices from "./pages/ProviderServices"
 import UserReservations from "./pages/UserReservations"
 import setupAxiosInterceptors from "./utils/axiosSetup"
+import AboutUs from "./pages/about-us.jsx";
 
 const App = () => {
     useEffect(() => {
@@ -37,6 +39,8 @@ const App = () => {
                     <Route path="/services" element={<Services />} />
                     <Route path="/payment" element={<Payment />} />
                     <Route path="/reservations" element={<UserReservations />} />
+                    <Route path="/about" element={<AboutUs/>}/>
+                    <Route path="/provider/services" element={<ProviderServices />} />
                 </Route>
             </Routes>
         </Router>

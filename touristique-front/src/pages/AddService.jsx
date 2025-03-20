@@ -202,7 +202,7 @@ const AddService = () => {
             setHoraires([""])
             setImageFile(null)
             setTimeout(() => {
-                navigate("/dashboard")
+                navigate("/services")
             }, 2000)
         } catch (error) {
             console.error("Erreur lors de l'ajout du service :", error.response?.status, error.response?.data)

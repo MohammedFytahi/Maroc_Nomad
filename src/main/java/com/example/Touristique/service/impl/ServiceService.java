@@ -196,4 +196,10 @@ public class ServiceService implements ServiceServiceInterface {
 
         serviceRepository.deleteById(serviceId);
     }
+
+    public List<TouristicService> getProviderServices(String providerEmail) {
+        User provider = userRepository.findByEmail(providerEmail)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+        return serviceRepository.findByProvider(provider);
+    }
 }
