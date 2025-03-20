@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { login } from "../../services/authService"
+import { login } from "../../services/AuthService"
 import { useNavigate, Link } from "react-router-dom"
 
 const LoginForm = () => {
