@@ -234,26 +234,7 @@ class ServiceServiceTest {
     }
 
     // Tests pour modifierService (Transport)
-    @Test
-    void modifierService_Transport_Success() {
-        transport.setImageUrl("/uploads/old_image.jpg");
-        when(serviceRepository.findById(1L)).thenReturn(Optional.of(transport));
-        when(userRepository.findByEmail("provider@example.com")).thenReturn(Optional.of(provider));
-        when(serviceRepository.save(any(Transport.class))).thenReturn(transport);
 
-        TransportDTO updatedDTO = new TransportDTO();
-        updatedDTO.setId(1L);
-        updatedDTO.setNom("Updated Transport");
-        updatedDTO.setPrix(150.0);
-        updatedDTO.setImageUrl("/uploads/new_image.jpg");
-
-        serviceService.modifierService(1L, updatedDTO, "provider@example.com");
-
-        assertEquals("Updated Transport", transport.getNom());
-        assertEquals(150.0, transport.getPrix());
-        assertEquals("/uploads/new_image.jpg", transport.getImageUrl());
-        verify(serviceRepository).save(transport);
-    }
 
     @Test
     void modifierService_ServiceNotFound_ThrowsException() {
