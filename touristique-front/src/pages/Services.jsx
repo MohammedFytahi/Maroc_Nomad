@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useNavigate, Link } from "react-router-dom"
@@ -30,11 +30,14 @@ const Services = () => {
     const [serviceToReview, setServiceToReview] = useState(null)
 
     // Supprimer ces états qui sont maintenant gérés dans le composant ReviewModal
-    // const [reviewFormData, setReviewFormData] = useState({
+    // const [reviewFormData, setReviewFormData = useState({
     //   note: 5,
     //   commentaire: ""
     // })
     const navigate = useNavigate()
+
+    // Ajouter un état pour stocker les statistiques des avis
+    const [serviceReviewStats, setServiceReviewStats] = useState({})
 
     // Fonction pour gérer les erreurs d'image
     const handleImageError = (e) => {
@@ -104,6 +107,42 @@ const Services = () => {
 
         fetchServices()
     }, [navigate])
+
+    // Ajouter cette fonction pour récupérer les statistiques des avis pour tous les services
+    const fetchReviewStats = async () => {
+        const token = localStorage.getItem("token")
+        if (!token) return
+
+        try {
+            const statsPromises = services.map((service) =>
+                axios.get(`/api/reviews/service/${service.id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+            )
+
+            const statsResponses = await Promise.all(statsPromises)
+
+            const statsMap = {}
+            statsResponses.forEach((response, index) => {
+                const serviceId = services[index].id
+                statsMap[serviceId] = {
+                    reviewCount: response.data.reviewCount || 0,
+                    averageRating: response.data.averageRating || 0,
+                }
+            })
+
+            setServiceReviewStats(statsMap)
+        } catch (error) {
+            console.error("Erreur lors de la récupération des statistiques des avis:", error)
+        }
+    }
+
+    // Ajouter un useEffect pour charger les statistiques des avis après le chargement des services
+    useEffect(() => {
+        if (services.length > 0) {
+            fetchReviewStats()
+        }
+    }, [services])
 
     // Fonction pour filtrer les services
     useEffect(() => {
@@ -672,17 +711,9 @@ const Services = () => {
     // const handleReviewFormChange = (e) => { ... }
     // const handleReviewSubmit = async (e) => { ... }
 
-    // Ouvrir le modal avec les détails du service
+    // Modifier la fonction openServiceModal pour rediriger vers la page de détail du service
     const openServiceModal = (service) => {
-        setSelectedService(service)
-        setShowModal(true)
-    }
-
-    // Ouvrir le modal de confirmation de suppression
-    const openDeleteModal = (service, e) => {
-        e.stopPropagation()
-        setServiceToDelete(service)
-        setShowDeleteModal(true)
+        navigate(`/services/${service.id}`)
     }
 
     // Animation variants pour les cartes
@@ -1031,6 +1062,12 @@ const Services = () => {
         )
     }
 
+    const openDeleteModal = (service, e) => {
+        e.stopPropagation()
+        setServiceToDelete(service)
+        setShowDeleteModal(true)
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-teal-50">
             {/* Notification de succès pour réservation */}
@@ -1248,12 +1285,13 @@ const Services = () => {
                         {filteredServices.map((service, index) => (
                             <motion.div
                                 key={service.id || index}
-                                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
+                                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full cursor-pointer"
                                 variants={cardVariants}
                                 initial="hidden"
                                 animate="visible"
                                 custom={index}
                                 whileHover={{ y: -5, scale: 1.02 }}
+                                onClick={() => navigate(`/services/${service.id}`)}
                             >
                                 {/* Image du service */}
                                 <div className="h-56 w-full overflow-hidden relative">
@@ -1340,11 +1378,41 @@ const Services = () => {
                     </span>
                                     </div>
 
-                                    <p className="text-sm text-gray-600 mb-5 line-clamp-3 flex-grow">
+                                    <p className="text-sm text-gray-600 mb-3 line-clamp-3 flex-grow">
                                         {service.description || "Aucune description disponible"}
                                     </p>
 
-                                    <div className="flex justify-between items-center mb-5 mt-auto">
+                                    {/* Affichage des avis */}
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="flex items-center">
+                                            {serviceReviewStats[service.id]?.averageRating > 0 ? (
+                                                <>
+                                                    <div className="flex">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <svg
+                                                                key={i}
+                                                                className={`h-4 w-4 ${i < Math.floor(serviceReviewStats[service.id]?.averageRating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                                                                viewBox="0 0 20 20"
+                                                                fill="currentColor"
+                                                            >
+                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-.181h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                            </svg>
+                                                        ))}
+                                                    </div>
+                                                    <span className="ml-1 text-sm font-medium text-gray-700">
+                            {serviceReviewStats[service.id]?.averageRating.toFixed(1)}
+                          </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-sm text-gray-500">Pas d'avis</span>
+                                            )}
+                                        </div>
+                                        <span className="text-sm text-gray-600">
+                      {serviceReviewStats[service.id]?.reviewCount || 0} avis
+                    </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center mb-5">
                                         <div className="flex items-center">
                                             <svg
                                                 className="h-5 w-5 text-indigo-500 mr-1"
@@ -1367,7 +1435,10 @@ const Services = () => {
 
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
-                                            onClick={() => openServiceModal(service)}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                navigate(`/services/${service.id}`)
+                                            }}
                                             className="bg-white border-2 border-indigo-500 rounded-lg py-2.5 px-4 text-sm font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                                         >
                                             Détails
@@ -1384,7 +1455,10 @@ const Services = () => {
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => handleReservation(service.id, service.prix)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleReservation(service.id, service.prix)
+                                                }}
                                                 disabled={!service.disponibilite}
                                                 className={`rounded-lg py-2.5 px-4 text-sm font-medium text-white transition-colors ${
                                                     service.disponibilite
@@ -1396,7 +1470,10 @@ const Services = () => {
                                             </button>
                                         )}
                                         <button
-                                            onClick={() => openReviewModal(service)}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                openReviewModal(service)
+                                            }}
                                             className="col-span-2 bg-green-600 hover:bg-green-700 text-white rounded-lg py-2.5 px-4 text-sm font-medium transition-colors"
                                         >
                                             Ajouter une review

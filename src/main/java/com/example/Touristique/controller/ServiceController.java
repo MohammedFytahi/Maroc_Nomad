@@ -1,14 +1,12 @@
 package com.example.Touristique.controller;
 
-import com.example.Touristique.dto.ActiviteDTO;
-import com.example.Touristique.dto.HebergementDTO;
-import com.example.Touristique.dto.RestaurationDTO;
-import com.example.Touristique.dto.TransportDTO;
+import com.example.Touristique.dto.*;
 import com.example.Touristique.mapper.ActiviteMapper;
 import com.example.Touristique.mapper.HebergementMapper;
 import com.example.Touristique.mapper.RestaurationMapper;
 import com.example.Touristique.mapper.TransportMapper;
 import com.example.Touristique.model.*;
+import com.example.Touristique.repository.ServiceRepository;
 import com.example.Touristique.repository.UserRepository;
 import com.example.Touristique.service.impl.ServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,6 +35,7 @@ public class ServiceController {
     private final ActiviteMapper activiteMapper;
     private final HebergementMapper hebergementMapper;
     private final UserRepository userRepository;
+    private final ServiceRepository serviceRepository;
 
     @Autowired
     public ServiceController(ServiceService serviceService,
@@ -41,13 +43,14 @@ public class ServiceController {
                              RestaurationMapper restaurationMapper,
                              ActiviteMapper activiteMapper,
                              HebergementMapper hebergementMapper,
-                             UserRepository userRepository) {
+                             UserRepository userRepository, ServiceRepository serviceRepository) {
         this.serviceService = serviceService;
         this.transportMapper = transportMapper;
         this.restaurationMapper = restaurationMapper;
         this.activiteMapper = activiteMapper;
         this.hebergementMapper = hebergementMapper;
         this.userRepository = userRepository;
+        this.serviceRepository = serviceRepository;
     }
 
     @PostMapping(value = "/transport", consumes = {"multipart/form-data"})
@@ -269,5 +272,31 @@ public class ServiceController {
             @AuthenticationPrincipal UserDetails userDetails) {
         serviceService.supprimerService(serviceId, userDetails.getUsername());
         return ResponseEntity.ok("Service supprimé avec succès !");
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ProviderStatsDTO> getProviderStats(@AuthenticationPrincipal UserDetails userDetails) {
+        ProviderStatsDTO stats = serviceService.getProviderStats(userDetails.getUsername());
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getServiceById(@PathVariable Long id) {
+        try {
+            Optional<TouristicService> service = serviceRepository.findById(id);
+            if (service.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("service", service.get());
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Service non trouvé avec l'ID : " + id);
+                return ResponseEntity.status(404).body(errorResponse);
+            }
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Erreur lors de la récupération du service : " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
 }

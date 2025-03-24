@@ -53,23 +53,22 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Autoriser l'accès public aux endpoints d'authentification
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                        // Autoriser l'accès public aux images
-                        .requestMatchers("/uploads/**").permitAll()
-                        // Configuration des rôles pour les différents endpoints
-                        .requestMatchers("/api/services/transport",
+                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                         .requestMatchers("/uploads/**").permitAll()
+                         .requestMatchers("/api/services/transport",
                                 "/api/services/restauration",
                                 "/api/services/activite",
                                 "/api/services/hebergement",
                                 "/api/services/transport/**",
                                 "/api/services/restauration/**",
                                 "/api/services/activite/**",
-                                "/api/services/hebergement/**"
+                                "/api/services/hebergement/**",
+                                "/api/services/stats"
+
                         ).hasRole("PROVIDER")
                         .requestMatchers("/api/reservations/**", "/api/payments/**").hasRole("USER")
                         .requestMatchers("/api/reviews/**").hasRole("USER") // Ajout de la règle pour /api/reviews
-                        .requestMatchers("/api/services/all").authenticated()
+                        .requestMatchers("/api/services/all","/api/reviews/service/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);

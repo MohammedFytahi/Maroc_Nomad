@@ -1,14 +1,13 @@
 package com.example.Touristique.service.impl;
 
-import com.example.Touristique.dto.ActiviteDTO;
-import com.example.Touristique.dto.HebergementDTO;
-import com.example.Touristique.dto.RestaurationDTO;
-import com.example.Touristique.dto.TransportDTO;
+import com.example.Touristique.dto.*;
 import com.example.Touristique.mapper.ActiviteMapper;
 import com.example.Touristique.mapper.HebergementMapper;
 import com.example.Touristique.mapper.RestaurationMapper;
 import com.example.Touristique.mapper.TransportMapper;
 import com.example.Touristique.model.*;
+import com.example.Touristique.repository.ReservationRepository;
+import com.example.Touristique.repository.ReviewRepository;
 import com.example.Touristique.repository.ServiceRepository;
 import com.example.Touristique.repository.UserRepository;
 import com.example.Touristique.service.interf.ServiceServiceInterface;
@@ -16,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ServiceService implements ServiceServiceInterface {
@@ -27,6 +28,8 @@ public class ServiceService implements ServiceServiceInterface {
     private final UserRepository userRepository;
     private final ActiviteMapper activiteMapper;
     private final HebergementMapper hebergementMapper;
+    private final ReservationRepository reservationRepository;
+    private final ReviewRepository reviewRepository;
 
     @Value("${file.upload-dir:/uploads/services}")
     private String uploadDirConfig;
@@ -36,13 +39,15 @@ public class ServiceService implements ServiceServiceInterface {
                           RestaurationMapper restaurationMapper,
                           UserRepository userRepository,
                           ActiviteMapper activiteMapper,
-                          HebergementMapper hebergementMapper) {
+                          HebergementMapper hebergementMapper, ReservationRepository reservationRepository, ReviewRepository reviewRepository) {
         this.serviceRepository = serviceRepository;
         this.transportMapper = transportMapper;
         this.restaurationMapper = restaurationMapper;
         this.userRepository = userRepository;
         this.activiteMapper = activiteMapper;
         this.hebergementMapper = hebergementMapper;
+        this.reservationRepository = reservationRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public void ajouterTransport(TransportDTO transportDTO) {
@@ -201,5 +206,42 @@ public class ServiceService implements ServiceServiceInterface {
         User provider = userRepository.findByEmail(providerEmail)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
         return serviceRepository.findByProvider(provider);
+    }
+
+    public ProviderStatsDTO getProviderStats(String providerEmail) {
+        // Récupérer le provider
+        User provider = userRepository.findByEmail(providerEmail)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+
+        // Récupérer tous les services du provider
+        List<TouristicService> services = serviceRepository.findByProvider(provider);
+
+        // Créer le DTO pour les statistiques
+        ProviderStatsDTO statsDTO = new ProviderStatsDTO();
+        statsDTO.setProviderId(provider.getId());
+        statsDTO.setTotalServices(services.size());
+
+        // Calculer les statistiques pour chaque service
+        Map<Long, ServiceStatsDTO> serviceStatsMap = new HashMap<>();
+        for (TouristicService service : services) {
+            ServiceStatsDTO serviceStats = new ServiceStatsDTO();
+            serviceStats.setServiceId(service.getId());
+            serviceStats.setServiceNom(service.getNom());
+
+            // Nombre de réservations
+            long reservationCount = reservationRepository.countByServiceId(service.getId());
+            serviceStats.setReservationCount((int) reservationCount);
+
+            // Nombre de reviews et note moyenne
+            long reviewCount = reviewRepository.countByServiceId(service.getId());
+            serviceStats.setReviewCount((int) reviewCount);
+            Double averageRating = reviewRepository.findAverageRatingByServiceId(service.getId());
+            serviceStats.setAverageRating(averageRating != null ? averageRating : 0.0);
+
+            serviceStatsMap.put(service.getId(), serviceStats);
+        }
+
+        statsDTO.setServiceStats(serviceStatsMap);
+        return statsDTO;
     }
 }

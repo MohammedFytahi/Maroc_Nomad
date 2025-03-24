@@ -13,6 +13,8 @@ import ProviderServices from "./pages/ProviderServices"
 import UserReservations from "./pages/UserReservations"
 import setupAxiosInterceptors from "./utils/axiosSetup"
 import AboutUs from "./pages/about-us.jsx";
+import ProviderStats from "./pages/ProviderStats";
+import ServiceDetail from "./pages/ServiceDetail"
 
 const App = () => {
     useEffect(() => {
@@ -41,6 +43,8 @@ const App = () => {
                     <Route path="/reservations" element={<UserReservations />} />
                     <Route path="/about" element={<AboutUs/>}/>
                     <Route path="/provider/services" element={<ProviderServices />} />
+                    <Route path="/provider-stats" element={<ProviderStats />} />
+                    <Route path="/services/:id" element={<ServiceDetail />} />
                 </Route>
             </Routes>
         </Router>

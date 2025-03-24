@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
-// Définir les icônes directement dans le fichier pour éviter les problèmes d'importation
-const Menu = (props) => (
+ const Menu = (props) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -140,7 +139,7 @@ const Navbar = () => {
                         {isAuthenticated && role === "PROVIDER" && (
                             <>
                                 <Link
-                                    to="/provider/services"
+                                    to="/provider-stats"
                                     className={`transition-colors ${isActive("/provider/services") ? "text-indigo-600 font-medium" : "text-gray-600 hover:text-indigo-600"}`}
                                 >
                                     Mes services

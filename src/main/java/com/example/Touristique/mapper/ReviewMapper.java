@@ -13,10 +13,13 @@ public interface ReviewMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "note", source = "note")
     @Mapping(target = "commentaire", source = "commentaire")
-    Review toEntity(ReviewDTO dto);
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "serviceId", source = "service.id")
+    @Mapping(target = "userName", expression = "java(entity.getUser() != null ? entity.getUser().getUsername() : \"Utilisateur inconnu\")")
+    ReviewDTO toDto(Review entity);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "note", source = "note")
     @Mapping(target = "commentaire", source = "commentaire")
-    ReviewDTO toDto(Review entity);
+    Review toEntity(ReviewDTO dto);
 }

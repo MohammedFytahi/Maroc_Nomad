@@ -11,4 +11,5 @@ public class ReviewDTO {
     private String commentaire;
     private Long userId;
     private Long serviceId;
+    private String userName;
 }
