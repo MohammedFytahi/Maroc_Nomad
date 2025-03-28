@@ -42,8 +42,7 @@ public class ReviewController {
         if (userDetails == null) {
             return ResponseEntity.status(401).body("Utilisateur non authentifié");
         }
-        // Récupérer l'ID de l'utilisateur à partir de l'email (username)
-        User user = userRepository.findByEmail(userDetails.getUsername())
+         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + userDetails.getUsername()));
         reviewDTO.setUserId(user.getId());
         try {
@@ -59,23 +58,24 @@ public class ReviewController {
     @GetMapping("/service/{serviceId}")
     public ResponseEntity<Map<String, Object>> getReviewsByServiceId(@PathVariable Long serviceId) {
         try {
-            // Récupérer les reviews pour le service
-            List<Review> reviews = reviewRepository.findByServiceId(serviceId);
+             List<Review> reviews = reviewRepository.findByServiceId(serviceId);
             List<ReviewDTO> reviewDTOs = reviews.stream()
                     .map(reviewMapper::toDto)
                     .collect(Collectors.toList());
 
-             long reviewCount = reviewRepository.countByServiceId(serviceId);
-
-             Double averageRating = reviewRepository.findAverageRatingByServiceId(serviceId);
+            long reviewCount = reviewRepository.countByServiceId(serviceId);
+            Double averageRating = reviewRepository.findAverageRatingByServiceId(serviceId);
             if (averageRating == null) {
                 averageRating = 0.0;
             }
 
-             Map<String, Object> response = new HashMap<>();
-            response.put("reviews", reviewDTOs);
-            response.put("reviewCount", reviewCount);
-            response.put("averageRating", averageRating);
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("reviews", reviewDTOs);
+            responseData.put("reviewCount", reviewCount);
+            responseData.put("averageRating", averageRating);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", responseData);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

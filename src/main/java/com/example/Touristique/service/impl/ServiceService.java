@@ -1,5 +1,6 @@
 package com.example.Touristique.service.impl;
 
+import com.example.Touristique.Exception.ResourceNotFoundException;
 import com.example.Touristique.dto.*;
 import com.example.Touristique.mapper.ActiviteMapper;
 import com.example.Touristique.mapper.HebergementMapper;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceService implements ServiceServiceInterface {
@@ -39,7 +41,9 @@ public class ServiceService implements ServiceServiceInterface {
                           RestaurationMapper restaurationMapper,
                           UserRepository userRepository,
                           ActiviteMapper activiteMapper,
-                          HebergementMapper hebergementMapper, ReservationRepository reservationRepository, ReviewRepository reviewRepository) {
+                          HebergementMapper hebergementMapper,
+                          ReservationRepository reservationRepository,
+                          ReviewRepository reviewRepository) {
         this.serviceRepository = serviceRepository;
         this.transportMapper = transportMapper;
         this.restaurationMapper = restaurationMapper;
@@ -55,7 +59,7 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("providerId ne peut pas être null");
         }
         User provider = userRepository.findById(transportDTO.getProviderId())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + transportDTO.getProviderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID : " + transportDTO.getProviderId()));
         Transport transport = transportMapper.toEntity(transportDTO);
         transport.setProvider(provider);
         serviceRepository.save(transport);
@@ -66,7 +70,7 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("providerId ne peut pas être null");
         }
         User provider = userRepository.findById(restaurationDTO.getProviderId())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + restaurationDTO.getProviderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID : " + restaurationDTO.getProviderId()));
         Restauration restauration = restaurationMapper.toEntity(restaurationDTO);
         restauration.setProvider(provider);
         serviceRepository.save(restauration);
@@ -77,7 +81,7 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("providerId ne peut pas être null");
         }
         User provider = userRepository.findById(activiteDTO.getProviderId())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + activiteDTO.getProviderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID : " + activiteDTO.getProviderId()));
         Activite activite = activiteMapper.toEntity(activiteDTO);
         activite.setProvider(provider);
         serviceRepository.save(activite);
@@ -88,7 +92,7 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("providerId ne peut pas être null");
         }
         User provider = userRepository.findById(hebergementDTO.getProviderId())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + hebergementDTO.getProviderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID : " + hebergementDTO.getProviderId()));
         Hebergement hebergement = hebergementMapper.toEntity(hebergementDTO);
         hebergement.setProvider(provider);
         serviceRepository.save(hebergement);
@@ -101,17 +105,15 @@ public class ServiceService implements ServiceServiceInterface {
     @Override
     public void modifierService(Long serviceId, Object serviceDTO, String providerEmail) {
         TouristicService existingService = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Service introuvable avec l'ID : " + serviceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Service introuvable avec l'ID : " + serviceId));
 
-        // Vérifier que le provider est le propriétaire du service
-        User provider = userRepository.findByEmail(providerEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+         User provider = userRepository.findByEmail(providerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + providerEmail));
         if (!existingService.getProvider().getId().equals(provider.getId())) {
-            throw new RuntimeException("Vous n'êtes pas autorisé à modifier ce service.");
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier ce service.");
         }
 
-        // Vérifier si l'ID dans le DTO correspond à l'ID de l'URL (optionnel)
-        if (serviceDTO instanceof TransportDTO transportDTO && transportDTO.getId() != null && !transportDTO.getId().equals(serviceId)) {
+         if (serviceDTO instanceof TransportDTO transportDTO && transportDTO.getId() != null && !transportDTO.getId().equals(serviceId)) {
             throw new IllegalArgumentException("L'ID du service dans le DTO ne correspond pas à l'ID dans l'URL.");
         } else if (serviceDTO instanceof RestaurationDTO restaurationDTO && restaurationDTO.getId() != null && !restaurationDTO.getId().equals(serviceId)) {
             throw new IllegalArgumentException("L'ID du service dans le DTO ne correspond pas à l'ID dans l'URL.");
@@ -121,11 +123,9 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("L'ID du service dans le DTO ne correspond pas à l'ID dans l'URL.");
         }
 
-        // Conserver l'ancienne image pour la supprimer si nécessaire
-        String oldImageUrl = existingService.getImageUrl();
+         String oldImageUrl = existingService.getImageUrl();
 
-        // Mise à jour sélective des champs
-        if (serviceDTO instanceof TransportDTO transportDTO) {
+         if (serviceDTO instanceof TransportDTO transportDTO) {
             Transport transport = (Transport) existingService;
             transport.setNom(transportDTO.getNom() != null ? transportDTO.getNom() : transport.getNom());
             transport.setDescription(transportDTO.getDescription() != null ? transportDTO.getDescription() : transport.getDescription());
@@ -169,8 +169,7 @@ public class ServiceService implements ServiceServiceInterface {
             throw new IllegalArgumentException("Type de service non supporté : " + serviceDTO.getClass().getSimpleName());
         }
 
-        // Supprimer l'ancienne image si une nouvelle a été fournie
-        String newImageUrl = (serviceDTO instanceof TransportDTO) ? ((TransportDTO) serviceDTO).getImageUrl() :
+         String newImageUrl = (serviceDTO instanceof TransportDTO) ? ((TransportDTO) serviceDTO).getImageUrl() :
                 (serviceDTO instanceof RestaurationDTO) ? ((RestaurationDTO) serviceDTO).getImageUrl() :
                         (serviceDTO instanceof ActiviteDTO) ? ((ActiviteDTO) serviceDTO).getImageUrl() :
                                 (serviceDTO instanceof HebergementDTO) ? ((HebergementDTO) serviceDTO).getImageUrl() : null;
@@ -191,12 +190,12 @@ public class ServiceService implements ServiceServiceInterface {
     @Override
     public void supprimerService(Long serviceId, String providerEmail) {
         TouristicService service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Service introuvable avec l'ID : " + serviceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Service introuvable avec l'ID : " + serviceId));
 
         User provider = userRepository.findByEmail(providerEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + providerEmail));
         if (!service.getProvider().getId().equals(provider.getId())) {
-            throw new RuntimeException("Vous n'êtes pas autorisé à supprimer ce service.");
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à supprimer ce service.");
         }
 
         serviceRepository.deleteById(serviceId);
@@ -204,35 +203,29 @@ public class ServiceService implements ServiceServiceInterface {
 
     public List<TouristicService> getProviderServices(String providerEmail) {
         User provider = userRepository.findByEmail(providerEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + providerEmail));
         return serviceRepository.findByProvider(provider);
     }
 
     public ProviderStatsDTO getProviderStats(String providerEmail) {
-        // Récupérer le provider
-        User provider = userRepository.findByEmail(providerEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + providerEmail));
+         User provider = userRepository.findByEmail(providerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + providerEmail));
 
-        // Récupérer tous les services du provider
-        List<TouristicService> services = serviceRepository.findByProvider(provider);
+         List<TouristicService> services = serviceRepository.findByProvider(provider);
 
-        // Créer le DTO pour les statistiques
-        ProviderStatsDTO statsDTO = new ProviderStatsDTO();
+         ProviderStatsDTO statsDTO = new ProviderStatsDTO();
         statsDTO.setProviderId(provider.getId());
         statsDTO.setTotalServices(services.size());
 
-        // Calculer les statistiques pour chaque service
         Map<Long, ServiceStatsDTO> serviceStatsMap = new HashMap<>();
         for (TouristicService service : services) {
             ServiceStatsDTO serviceStats = new ServiceStatsDTO();
             serviceStats.setServiceId(service.getId());
             serviceStats.setServiceNom(service.getNom());
 
-            // Nombre de réservations
             long reservationCount = reservationRepository.countByServiceId(service.getId());
             serviceStats.setReservationCount((int) reservationCount);
 
-            // Nombre de reviews et note moyenne
             long reviewCount = reviewRepository.countByServiceId(service.getId());
             serviceStats.setReviewCount((int) reviewCount);
             Double averageRating = reviewRepository.findAverageRatingByServiceId(service.getId());
@@ -244,4 +237,18 @@ public class ServiceService implements ServiceServiceInterface {
         statsDTO.setServiceStats(serviceStatsMap);
         return statsDTO;
     }
+
+public TouristicService getServiceWithMostReservations(){
+        return serviceRepository.findAllWithProvider()
+                .stream()
+                .max((service1,service2)->{
+                    Long reservationCount1 = reservationRepository.countByServiceId(service1.getId());
+                    Long reservationCount2 = reservationRepository.countByServiceId(service2.getId());
+                    return Long.compare(reservationCount1,reservationCount2);
+
+                })
+                .orElse(null);
+}
+
+    
 }

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:22-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY target/Touristique-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8081

@@ -9,10 +9,11 @@ import com.example.Touristique.repository.ReviewRepository;
 import com.example.Touristique.repository.ServiceRepository;
 import com.example.Touristique.repository.UserRepository;
 import com.example.Touristique.service.interf.ReviewService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -20,14 +21,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ServiceRepository serviceRepository;
 
-    @Autowired
-    public ReviewServiceImpl(ReviewRepository reviewRepository, ReviewMapper reviewMapper,
-                             UserRepository userRepository, ServiceRepository serviceRepository) {
-        this.reviewRepository = reviewRepository;
-        this.reviewMapper = reviewMapper;
-        this.userRepository = userRepository;
-        this.serviceRepository = serviceRepository;
-    }
+
 
     @Override
     public void addReview(ReviewDTO reviewDTO) {
@@ -38,14 +32,12 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IllegalArgumentException("La note doit être entre 0 et 5");
         }
 
-        // Récupérer les entités User et TouristicService à partir des IDs
-        User user = userRepository.findById(reviewDTO.getUserId())
+         User user = userRepository.findById(reviewDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + reviewDTO.getUserId()));
         TouristicService service = serviceRepository.findById(reviewDTO.getServiceId())
                 .orElseThrow(() -> new RuntimeException("Service non trouvé avec l'ID : " + reviewDTO.getServiceId()));
 
-        // Mapper le DTO vers l'entité, puis définir les relations manuellement
-        Review review = reviewMapper.toEntity(reviewDTO);
+         Review review = reviewMapper.toEntity(reviewDTO);
         review.setUser(user);
         review.setService(service);
 

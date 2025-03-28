@@ -11,7 +11,6 @@ const ReviewModal = ({ isOpen, onClose, service, onSuccess, onError }) => {
 
     if (!isOpen || !service) return null
 
-    // Gérer les changements dans le formulaire de review
     const handleReviewFormChange = (e) => {
         const { name, value } = e.target
         setReviewFormData((prev) => ({
@@ -41,10 +40,8 @@ const ReviewModal = ({ isOpen, onClose, service, onSuccess, onError }) => {
             })
 
             if (response.status === 200) {
-                // Afficher un message de succès
                 onSuccess("Review ajoutée avec succès !")
 
-                // Fermer le modal et réinitialiser le formulaire
                 onClose()
                 setReviewFormData({
                     note: 5,

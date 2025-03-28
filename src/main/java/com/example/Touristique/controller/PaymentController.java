@@ -24,8 +24,7 @@ public class PaymentController {
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
-        // Traitement du webhook Stripe (à implémenter)
-        return ResponseEntity.ok("Webhook reçu");
+         return ResponseEntity.ok("Webhook reçu");
     }
 
     @PostMapping("/confirm/{paymentIntentId}")

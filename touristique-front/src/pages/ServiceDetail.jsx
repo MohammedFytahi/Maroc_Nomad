@@ -58,15 +58,15 @@ const ServiceDetail = () => {
                 const serviceResponse = await axios.get(`/api/services/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
-                setService(serviceResponse.data.service) // Adjusted to match the response format
+                setService(serviceResponse.data) // Change this line to access the service data directly
 
-                // Récupérer les avis du service
+                // Also update the reviews handling to match the response structure from your ReviewController:
                 const reviewsResponse = await axios.get(`/api/reviews/service/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
-                setReviews(reviewsResponse.data.reviews || [])
-                setReviewCount(reviewsResponse.data.reviewCount || 0)
-                setAverageRating(reviewsResponse.data.averageRating || 0)
+                setReviews(reviewsResponse.data.data.reviews || [])
+                setReviewCount(reviewsResponse.data.data.reviewCount || 0)
+                setAverageRating(reviewsResponse.data.data.averageRating || 0)
             } catch (error) {
                 console.error("Erreur lors de la récupération des données:", error)
                 setError("Erreur lors de la récupération des données. Veuillez réessayer.")
@@ -836,3 +836,4 @@ const ServiceDetail = () => {
 }
 
 export default ServiceDetail
+

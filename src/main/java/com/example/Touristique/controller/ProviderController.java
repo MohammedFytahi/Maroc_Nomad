@@ -11,7 +11,7 @@ public class ProviderController {
 
     @PostMapping("/add-service")
     public ResponseEntity<String> addService(@RequestBody String serviceData, @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println("UserDetails: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities()); // Debug
+        System.out.println("UserDetails: " + userDetails.getUsername() + ", Authorities: " + userDetails.getAuthorities());
         return ResponseEntity.ok("Service ajouté avec succès: " + serviceData);
     }
 }

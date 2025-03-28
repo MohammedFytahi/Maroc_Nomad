@@ -37,6 +37,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<TouristicService> servicesOfferts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -1,6 +1,7 @@
 package com.example.Touristique.service.impl;
 
-import com.example.Touristique.dto.ReservationDTO;
+import com.example.Touristique.Exception.ResourceNotFoundException;
+ import com.example.Touristique.dto.ReservationDTO;
 import com.example.Touristique.mapper.ReservationMapper;
 import com.example.Touristique.model.Reservation;
 import com.example.Touristique.model.TouristicService;
@@ -37,16 +38,14 @@ public class ReservationService implements ReservationServiceInterface {
     @Transactional
     public Reservation reserverService(Long serviceId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        Optional<TouristicService> serviceOpt = serviceRepository.findById(serviceId);
-
-        if (userOpt.isEmpty() || serviceOpt.isEmpty()) {
-            throw new RuntimeException("Utilisateur ou Service introuvable");
-        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + email));
+        TouristicService service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Service non trouvé avec l'ID : " + serviceId));
 
         Reservation reservation = new Reservation();
-        reservation.setUser(userOpt.get());
-        reservation.setService(serviceOpt.get());
+        reservation.setUser(user);
+        reservation.setService(service);
         reservation.setDateReservation(new Date());
         reservation.setStatut("EN_ATTENTE_PAIEMENT");
 
@@ -54,24 +53,19 @@ public class ReservationService implements ReservationServiceInterface {
     }
 
     public Reservation changerStatutReservation(Long reservationId, String nouveauStatut) {
-        Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Réservation introuvable avec l'ID : " + reservationId));
 
-        if (reservationOpt.isEmpty()) {
-            throw new RuntimeException("Réservation introuvable");
-        }
-
-        Reservation reservation = reservationOpt.get();
         reservation.setStatut(nouveauStatut);
         return reservationRepository.save(reservation);
     }
 
     @Transactional
     public void annulerReservation(Long reservationId) {
-        Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
-        if (reservationOpt.isPresent() &&
-                ("CONFIRMEE".equals(reservationOpt.get().getStatut()) ||
-                        "COMPLETE".equals(reservationOpt.get().getStatut()))) {
-            // Logique d'annulation si nécessaire
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Réservation introuvable avec l'ID : " + reservationId));
+
+        if ("CONFIRMEE".equals(reservation.getStatut()) || "COMPLETE".equals(reservation.getStatut())) {
         }
 
         reservationRepository.deleteById(reservationId);
@@ -81,7 +75,7 @@ public class ReservationService implements ReservationServiceInterface {
     public List<ReservationDTO> getUserReservations() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'email : " + userEmail));
 
         List<Reservation> reservations = reservationRepository.findByUser(user);
         return reservations.stream()

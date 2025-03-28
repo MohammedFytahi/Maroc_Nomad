@@ -1,6 +1,7 @@
 package com.example.Touristique.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +22,12 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "service_id")
+    @JsonIgnore
     private TouristicService service;
 
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)

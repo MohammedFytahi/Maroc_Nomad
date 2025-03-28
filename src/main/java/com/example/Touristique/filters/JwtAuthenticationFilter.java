@@ -36,8 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        // Ignorer les chemins statiques et les requêtes OPTIONS
-        if (shouldSkipAuthentication(request)) {
+         if (shouldSkipAuthentication(request)) {
             logger.debug("Ignorer l'authentification pour: {}", requestURI);
             filterChain.doFilter(request, response);
             return;
@@ -45,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         logger.debug("Traitement de la requête JWT: {}", requestURI);
 
-        // Vérification du token JWT
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

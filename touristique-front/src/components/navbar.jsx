@@ -108,12 +108,7 @@ const Navbar = () => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-8">
-                        <Link
-                            to="/destinations"
-                            className={`transition-colors ${isActive("/destinations") ? "text-indigo-600 font-medium" : "text-gray-600 hover:text-indigo-600"}`}
-                        >
-                            Destinations
-                        </Link>
+
                         <Link
                             to="/services"
                             className={`transition-colors ${isActive("/services") ? "text-indigo-600 font-medium" : "text-gray-600 hover:text-indigo-600"}`}
